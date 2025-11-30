@@ -1,0 +1,173 @@
+<div class="min-h-screen bg-background">
+  <main class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold text-foreground">My Account</h1>
+      <p class="text-muted-foreground">Manage your library loans and borrowing history</p>
+    </div>
+
+    <div class="mb-8 rounded-lg border border-border bg-card p-6">
+      <h2 class="text-lg font-semibold text-card-foreground">Account Information</h2>
+      <div class="mt-4 space-y-2 text-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-muted-foreground">Name:</span>
+          <span class="font-medium text-foreground">{{ auth.user()?.name }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-muted-foreground">Email:</span>
+          <span class="font-medium text-foreground">{{ auth.user()?.email }}</span>
+        </div>
+        @if (auth.user()?.studentId) {
+          <div class="flex items-center justify-between">
+            <span class="text-muted-foreground">Student ID:</span>
+            <span class="font-medium text-foreground">{{ auth.user()?.studentId }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="mb-8 grid gap-6 md:grid-cols-3">
+      <div class="rounded-lg border border-border bg-card p-6">
+        <div class="flex items-center gap-3">
+          <div class="rounded-lg bg-primary/10 p-2">
+            <lucide-icon name="book-open" class="h-5 w-5 text-primary"></lucide-icon>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-foreground">{{ currentLoans().length }}</p>
+            <p class="text-sm text-muted-foreground">Active Loans</p>
+          </div>
+        </div>
+      </div>
+      <div class="rounded-lg border border-border bg-card p-6">
+        <div class="flex items-center gap-3">
+          <div class="rounded-lg bg-destructive/10 p-2">
+            <lucide-icon name="alert-circle" class="h-5 w-5 text-destructive"></lucide-icon>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-destructive">{{ overdueCount() }}</p>
+            <p class="text-sm text-muted-foreground">Overdue</p>
+          </div>
+        </div>
+      </div>
+      <div class="rounded-lg border border-border bg-card p-6">
+        <div class="flex items-center gap-3">
+          <div class="rounded-lg bg-secondary/50 p-2">
+            <lucide-icon name="check-circle" class="h-5 w-5 text-secondary-foreground"></lucide-icon>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-foreground">{{ pastLoans().length }}</p>
+            <p class="text-sm text-muted-foreground">Total Returned</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-lg border border-border bg-card">
+      <div class="border-b border-border px-6 py-4">
+        <h2 class="text-lg font-semibold">My Loans</h2>
+        <p class="text-sm text-muted-foreground">View your current and past book loans</p>
+      </div>
+      <div class="px-6 pt-4">
+        <div class="inline-flex rounded-lg border border-border bg-muted p-1">
+          <button
+            type="button"
+            class="rounded-md px-4 py-2 text-sm font-medium"
+            [class.bg-card]="activeTab() === 'current'"
+            (click)="setTab('current')"
+          >
+            Current Loans ({{ currentLoans().length }})
+          </button>
+          <button
+            type="button"
+            class="rounded-md px-4 py-2 text-sm font-medium"
+            [class.bg-card]="activeTab() === 'history'"
+            (click)="setTab('history')"
+          >
+                Returned ({{ pastLoans().length }})
+          </button>
+        </div>
+      </div>
+      <div class="px-6 py-6">
+        @if (isLoading()) {
+          <div class="flex items-center justify-center py-12">
+            <div class="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+          </div>
+        } @else if (activeTab() === 'current') {
+          @if (currentLoans().length === 0) {
+            <div class="flex flex-col items-center gap-3 py-10 text-muted-foreground">
+              <lucide-icon name="book-open" class="h-12 w-12"></lucide-icon>
+              <p>You have no active loans</p>
+            </div>
+          } @else {
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="text-muted-foreground">
+                  <tr>
+                    <th class="pb-3 font-medium">Book Title</th>
+                    <th class="pb-3 font-medium">Author</th>
+                    <th class="pb-3 font-medium">Borrowed Date</th>
+                    <th class="pb-3 font-medium">Due Date</th>
+                    <th class="pb-3 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border">
+                  @for (loan of currentLoans(); track loan._id) {
+                    <tr class="text-foreground">
+                      <td class="py-3 font-medium">{{ loan.book.title }}</td>
+                      <td>{{ loan.book.author }}</td>
+                      <td>{{ formatDate(loan.borrowDate) }}</td>
+                      <td class="flex items-center gap-2">
+                        <lucide-icon name="clock" class="h-4 w-4 text-muted-foreground"></lucide-icon>
+                        {{ formatDate(loan.dueDate) }}
+                      </td>
+                      <td>
+                        <span class="rounded-full px-3 py-1 text-xs font-semibold" [ngClass]="statusClasses(loan.status)">
+                          {{ statusLabel(loan.status) }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        } @else {
+          @if (pastLoans().length === 0) {
+            <div class="flex flex-col items-center gap-3 py-10 text-muted-foreground">
+              <lucide-icon name="check-circle" class="h-12 w-12"></lucide-icon>
+              <p>No borrowing history yet</p>
+            </div>
+          } @else {
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="text-muted-foreground">
+                  <tr>
+                    <th class="pb-3 font-medium">Book Title</th>
+                    <th class="pb-3 font-medium">Author</th>
+                    <th class="pb-3 font-medium">Borrowed Date</th>
+                    <th class="pb-3 font-medium">Returned Date</th>
+                    <th class="pb-3 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border">
+                  @for (loan of pastLoans(); track loan._id) {
+                    <tr class="text-foreground">
+                      <td class="py-3 font-medium">{{ loan.book.title }}</td>
+                      <td>{{ loan.book.author }}</td>
+                      <td>{{ formatDate(loan.borrowDate) }}</td>
+                      <td>{{ formatDate(loan.returnDate) }}</td>
+                      <td>
+                        <span class="rounded-full px-3 py-1 text-xs font-semibold" [ngClass]="statusClasses(loan.status)">
+                          {{ statusLabel(loan.status) }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </main>
+</div>

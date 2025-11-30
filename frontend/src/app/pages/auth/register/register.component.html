@@ -1,0 +1,97 @@
+<div class="flex min-h-screen items-center justify-center bg-background px-4 py-8">
+  <div class="w-full max-w-md">
+    <div class="mb-8 text-center">
+      <a routerLink="/" class="inline-flex items-center gap-2 text-2xl font-bold text-primary">
+        <lucide-icon name="book-open" class="h-8 w-8"></lucide-icon>
+        University Library
+      </a>
+    </div>
+
+    <div class="rounded-lg border border-border bg-card shadow-sm">
+      <div class="border-b border-border px-6 py-4">
+        <h1 class="text-2xl font-semibold text-card-foreground">Register</h1>
+        <p class="text-sm text-muted-foreground">Create an account to access the library</p>
+      </div>
+
+      <form class="space-y-4 px-6 py-6" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="space-y-2">
+          <label class="text-sm font-medium" for="name">Full Name</label>
+          <input id="name" type="text" formControlName="name" placeholder="John Smith" class="w-full rounded-md border border-input bg-background px-3 py-2" />
+          @if (form.get('name')?.invalid && form.get('name')?.touched) {
+            <p class="text-sm text-destructive">Name is required.</p>
+          }
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium" for="email">Email</label>
+          <input id="email" type="email" formControlName="email" placeholder="your.email@student.edu" class="w-full rounded-md border border-input bg-background px-3 py-2" />
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <p class="text-sm text-destructive">Enter a valid email address.</p>
+          }
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium" for="studentId">Student ID (Optional)</label>
+          <input id="studentId" type="text" formControlName="studentId" placeholder="S2024001" class="w-full rounded-md border border-input bg-background px-3 py-2" />
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium" for="password">Password</label>
+              <div class="relative">
+                <input
+                  id="password"
+                  [type]="showPassword() ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="••••••••"
+                  class="w-full rounded-md border border-input bg-background px-3 py-2 pr-10"
+                />
+                <button
+                  type="button"
+                  class="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                  (click)="togglePasswordVisibility('password')"
+                >
+                  <lucide-icon [name]="showPassword() ? 'eye-off' : 'eye'" class="h-4 w-4"></lucide-icon>
+                </button>
+              </div>
+              @if (form.get('password')?.invalid && form.get('password')?.touched) {
+                <p class="text-sm text-destructive">Password must be at least 6 characters.</p>
+              }
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-sm font-medium" for="confirmPassword">Confirm Password</label>
+              <div class="relative">
+                <input
+                  id="confirmPassword"
+                  [type]="showConfirmPassword() ? 'text' : 'password'"
+                  formControlName="confirmPassword"
+                  placeholder="••••••••"
+                  class="w-full rounded-md border border-input bg-background px-3 py-2 pr-10"
+                />
+                <button
+                  type="button"
+                  class="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                  (click)="togglePasswordVisibility('confirm')"
+                >
+                  <lucide-icon [name]="showConfirmPassword() ? 'eye-off' : 'eye'" class="h-4 w-4"></lucide-icon>
+                </button>
+              </div>
+              @if (!passwordsMatch && form.get('confirmPassword')?.touched) {
+                <p class="text-sm text-destructive">Passwords do not match.</p>
+              }
+        </div>
+
+        <button type="submit" class="w-full rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground" [disabled]="isSubmitting()">
+          {{ isSubmitting() ? 'Creating account…' : 'Register' }}
+        </button>
+
+        <div class="pt-4 text-center">
+          <p class="text-sm text-muted-foreground">
+            Already have an account?
+            <a routerLink="/login" class="text-primary hover:underline">Login here</a>
+          </p>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

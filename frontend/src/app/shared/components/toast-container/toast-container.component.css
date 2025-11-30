@@ -1,0 +1,12 @@
+:host {
+  pointer-events: none;
+  display: block;
+}
+
+.toast-stack {
+  width: min(24rem, calc(100vw - 2rem));
+}
+
+.toast-stack > div {
+  pointer-events: auto;
+}

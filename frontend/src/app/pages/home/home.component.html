@@ -1,0 +1,86 @@
+<div class="min-h-screen bg-background">
+  <main>
+    <section class="bg-gradient-to-b from-primary/5 to-background px-4 py-20">
+      <div class="container mx-auto max-w-4xl text-center">
+        <h1 class="mb-6 text-5xl font-bold text-foreground">Welcome to the University Library</h1>
+        <p class="mb-8 text-xl text-muted-foreground">
+          Discover thousands of books, journals, and resources to support your academic journey. Access our comprehensive
+          catalog and manage your loans online.
+        </p>
+        <div class="flex flex-col gap-4 sm:flex-row sm:justify-center">
+          <a routerLink="/catalog" class="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-lg font-medium text-primary-foreground shadow">
+            <lucide-icon name="search" class="h-5 w-5"></lucide-icon>
+            Browse Catalog
+          </a>
+          @if (!auth.isAuthenticated()) {
+            <a routerLink="/register" class="inline-flex items-center justify-center rounded-md border border-border px-6 py-3 text-lg font-medium text-foreground">
+              Get Started
+            </a>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="px-4 py-16">
+      <div class="container mx-auto">
+        <h2 class="mb-12 text-center text-3xl font-bold text-foreground">Library Features</h2>
+        <div class="mx-auto grid max-w-5xl gap-8 md:grid-cols-3">
+          <div class="rounded-lg border border-border bg-card p-6 text-center">
+            <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <lucide-icon name="book-open" class="h-6 w-6"></lucide-icon>
+            </div>
+            <h3 class="mb-2 text-xl font-semibold text-card-foreground">Extensive Collection</h3>
+            <p class="text-muted-foreground">
+              Access thousands of books across all academic disciplines, from textbooks to research materials.
+            </p>
+          </div>
+
+          <div class="rounded-lg border border-border bg-card p-6 text-center">
+            <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <lucide-icon name="search" class="h-6 w-6"></lucide-icon>
+            </div>
+            <h3 class="mb-2 text-xl font-semibold text-card-foreground">Easy Search</h3>
+            <p class="text-muted-foreground">
+              Find books quickly with our powerful search and filter system by title, author, or category.
+            </p>
+          </div>
+
+          <div class="rounded-lg border border-border bg-card p-6 text-center">
+            <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <lucide-icon name="clock" class="h-6 w-6"></lucide-icon>
+            </div>
+            <h3 class="mb-2 text-xl font-semibold text-card-foreground">Track Your Loans</h3>
+            <p class="text-muted-foreground">
+              Manage your borrowed books, check due dates, and view your borrowing history online.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-muted/30 px-4 py-16">
+      <div class="container mx-auto">
+        <div class="mx-auto grid max-w-4xl gap-8 text-center md:grid-cols-3">
+          <div>
+            <div class="mb-2 text-4xl font-bold text-primary">10,000+</div>
+            <div class="text-muted-foreground">Books Available</div>
+          </div>
+          <div>
+            <div class="mb-2 text-4xl font-bold text-primary">5,000+</div>
+            <div class="text-muted-foreground">Active Members</div>
+          </div>
+          <div>
+            <div class="mb-2 text-4xl font-bold text-primary">24/7</div>
+            <div class="text-muted-foreground">Online Access</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-card border-t border-border px-4 py-8">
+    <div class="container mx-auto text-center text-muted-foreground">
+      <p>&copy; 2025 University Library. All rights reserved.</p>
+    </div>
+  </footer>
+</div>

@@ -1,0 +1,62 @@
+<nav class="border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 sticky top-0 z-40">
+  <div class="container mx-auto px-4">
+    <div class="flex h-16 items-center justify-between">
+      <a routerLink="/" class="flex items-center gap-2 text-xl font-bold text-primary hover:text-primary/90">
+        <lucide-icon name="book-open" class="h-6 w-6"></lucide-icon>
+        <span>University Library</span>
+      </a>
+
+      <div class="flex flex-1 items-center gap-6">
+        @if (auth.isAuthenticated()) {
+          <div class="hidden lg:flex items-center gap-2 ml-auto">
+            @for (card of cards; track card.label) {
+              @if (canShowCard(card)) {
+                <a
+                  [routerLink]="resolveRoute(card)"
+                  routerLinkActive="text-primary"
+                  class="flex items-center gap-1 rounded-md px-3 py-2 text-foreground hover:text-primary transition-colors text-sm"
+                >
+                  <lucide-icon [name]="card.icon" class="h-4 w-4"></lucide-icon>
+                  {{ card.label }}
+                </a>
+              }
+            }
+          </div>
+        }
+
+        @if (auth.isAuthenticated()) {
+          <ng-container>
+
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2 rounded-md bg-primary/10 px-3 py-1.5 text-primary">
+                <lucide-icon name="user" class="h-4 w-4 text-secondary-foreground"></lucide-icon>
+                <span class="text-sm font-medium text-secondary-foreground">{{ auth.user()?.name }}</span>
+              </div>
+              <button
+                type="button"
+                (click)="logout()"
+                class="flex items-center gap-1 rounded-md bg-destructive/10 px-3 py-1.5 text-sm text-destructive hover:bg-destructive/20"
+              >
+                <lucide-icon name="log-out" class="h-4 w-4"></lucide-icon>
+                Logout
+              </button>
+            </div>
+          </ng-container>
+        } @else {
+          <div class="flex items-center gap-2 ml-auto">
+            <a
+              routerLink="/login"
+              class="rounded-md px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+            >
+              Login
+            </a>
+            <a routerLink="/register" class="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">
+              Register
+            </a>
+          </div>
+        }
+
+      </div>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,73 @@
+<div class="min-h-screen bg-background">
+  <main class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold text-foreground">Book Catalog</h1>
+      <p class="text-muted-foreground">Browse and search our extensive collection</p>
+    </div>
+
+    <div class="mb-8 space-y-4">
+      <div class="flex flex-col gap-4 md:flex-row">
+        <div class="relative flex-1">
+          <lucide-icon name="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"></lucide-icon>
+          <input
+            type="text"
+            class="w-full rounded-md border border-input bg-background px-10 py-2"
+            placeholder="Search by title, author, or ISBN..."
+            [formControl]="searchControl"
+          />
+        </div>
+        <select class="w-full rounded-md border border-input bg-background px-3 py-2 md:w-56" [formControl]="categoryControl">
+          <option value="all">All Categories</option>
+          @for (category of categories(); track category) {
+            <option [value]="category">{{ category }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="flex items-center justify-center py-12">
+        <div class="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+      </div>
+    } @else if (books().length === 0) {
+      <div class="flex flex-col items-center gap-4 py-12 text-center">
+        <lucide-icon name="book-open" class="h-12 w-12 text-muted-foreground"></lucide-icon>
+        <p class="text-muted-foreground">No books found matching your criteria</p>
+      </div>
+    } @else {
+      <div class="grid gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        @for (book of books(); track book._id) {
+          <a [routerLink]="['/books', book._id]" class="block rounded-md border border-border/80 bg-card/90 p-3 shadow-sm transition hover:shadow-md text-sm">
+            <div class="mb-2 flex aspect-[3/5] w-full items-center justify-center overflow-hidden rounded-md border border-border/60 bg-muted">
+              <img
+                [src]="book.imageUrl || placeholderCover"
+                [alt]="book.title + ' cover'"
+                class="h-full w-full object-cover"
+                loading="lazy"
+              />
+            </div>
+            <div class="mb-2 flex items-center justify-between">
+              <span class="rounded-full bg-secondary/90 px-2 py-0.5 text-[10px] font-semibold text-secondary-foreground">{{ book.category }}</span>
+              <span
+                class="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                [class.bg-success]="book.availableCopies > 0"
+                [class.text-success-foreground]="book.availableCopies > 0"
+                [class.bg-destructive/10]="book.availableCopies === 0"
+                [class.text-destructive]="book.availableCopies === 0"
+              >
+                {{ book.availableCopies > 0 ? 'Available' : 'Not Available' }}
+              </span>
+            </div>
+            <h3 class="line-clamp-2 text-base font-semibold text-card-foreground">{{ book.title }}</h3>
+            <p class="text-xs text-muted-foreground">{{ book.author }}</p>
+            <p class="mt-2 line-clamp-3 text-[11px] text-muted-foreground">{{ book.description }}</p>
+            <div class="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
+              <span>ISBN: {{ book.ISBN }}</span>
+              <span class="font-medium text-foreground">{{ book.availableCopies }} of {{ book.totalCopies }} available</span>
+            </div>
+          </a>
+        }
+      </div>
+    }
+  </main>
+</div>

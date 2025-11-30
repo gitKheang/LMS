@@ -1,0 +1,121 @@
+<div class="flex min-h-screen items-center justify-center bg-background px-4">
+  <div class="w-full max-w-md">
+    <div class="mb-8 text-center">
+      <a routerLink="/" class="inline-flex items-center gap-2 text-2xl font-bold text-primary">
+        <lucide-icon name="book-open" class="h-8 w-8"></lucide-icon>
+        University Library
+      </a>
+    </div>
+
+    <div class="rounded-lg border border-border bg-card shadow-sm">
+      <div class="border-b border-border px-6 py-4">
+        <h1 class="text-2xl font-semibold text-card-foreground">Login</h1>
+        <p class="text-sm text-muted-foreground">Enter your credentials to access your account</p>
+      </div>
+      <form class="space-y-4 px-6 py-6" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-foreground" for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="your.email@student.edu"
+            class="w-full rounded-md border border-input bg-background px-3 py-2"
+          />
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <p class="text-sm text-destructive">Enter a valid email address.</p>
+          }
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-foreground" for="password">Password</label>
+          <div class="relative">
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="••••••••"
+              class="w-full rounded-md border border-input bg-background px-3 py-2 pr-10"
+            />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+              (click)="togglePasswordVisibility()"
+            >
+              <lucide-icon [name]="showPassword() ? 'eye-off' : 'eye'" class="h-4 w-4"></lucide-icon>
+            </button>
+          </div>
+          @if (form.get('password')?.invalid && form.get('password')?.touched) {
+            <p class="text-sm text-destructive">Password must be at least 6 characters.</p>
+          }
+        </div>
+
+        <div class="text-right">
+          <button type="button" class="text-sm text-primary hover:underline" (click)="openForgotDialog()">
+            Forgot password?
+          </button>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground"
+          [disabled]="isSubmitting()"
+        >
+          {{ isSubmitting() ? 'Logging in…' : 'Login' }}
+        </button>
+
+        <div class="pt-4 text-center">
+          <p class="text-sm text-muted-foreground">
+            Don't have an account?
+            <a routerLink="/register" class="text-primary hover:underline">Register here</a>
+          </p>
+        </div>
+
+        <div class="mt-6 rounded-md bg-muted px-4 py-3 text-sm text-muted-foreground">
+          <p class="mb-2 font-semibold">Demo Accounts:</p>
+          <p>Admin: admin@library.edu / admin123</p>
+          <p>Staff: staff@library.edu / staff123</p>
+          <p>User: john.smith@student.edu / user123</p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  @if (forgotDialogOpen()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div class="w-full max-w-md rounded-xl border border-border bg-card shadow-2xl">
+        <div class="flex items-center justify-between border-b border-border px-6 py-4">
+          <div>
+            <h2 class="text-xl font-semibold text-card-foreground">Request Password Reset</h2>
+            <p class="text-sm text-muted-foreground">Enter your account email and an administrator will assist you.</p>
+          </div>
+          <button type="button" class="text-muted-foreground hover:text-foreground" (click)="closeForgotDialog()">✕</button>
+        </div>
+        <div class="space-y-4 px-6 py-6">
+          <div class="space-y-2">
+            <label class="text-sm font-medium" for="forgotEmail">Email</label>
+            <input
+              id="forgotEmail"
+              type="email"
+              [value]="forgotEmail()"
+              (input)="forgotEmail.set($any($event.target).value)"
+              class="w-full rounded-md border border-input bg-background px-3 py-2"
+              placeholder="your.email@student.edu"
+            />
+          </div>
+          <div class="flex justify-end gap-3">
+            <button type="button" class="rounded-md border border-border px-4 py-2" (click)="closeForgotDialog()">Cancel</button>
+            <button
+              type="button"
+              class="rounded-md bg-primary px-4 py-2 text-primary-foreground"
+              [disabled]="isResetSubmitting()"
+              (click)="submitResetRequest()"
+            >
+              {{ isResetSubmitting() ? 'Sending…' : 'Submit Request' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

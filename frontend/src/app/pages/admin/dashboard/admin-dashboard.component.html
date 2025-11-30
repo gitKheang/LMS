@@ -1,0 +1,61 @@
+<div class="min-h-screen bg-background">
+  <main class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold text-foreground">Admin Dashboard</h1>
+      <p class="text-muted-foreground">Overview of library statistics and recent activity</p>
+    </div>
+
+    @if (isLoading()) {
+      <div class="flex items-center justify-center py-12">
+        <div class="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+      </div>
+    } @else {
+      <div class="rounded-xl border border-border bg-card">
+        <div class="border-b border-border px-6 py-4">
+          <h2 class="text-lg font-semibold">Recent Loans</h2>
+          <p class="text-sm text-muted-foreground">Latest borrowing activity in the library</p>
+        </div>
+        <div class="px-6 py-6">
+          @if (stats()?.recentLoans?.length) {
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="text-muted-foreground">
+                  <tr>
+                    <th class="pb-3 font-medium">User</th>
+                    <th class="pb-3 font-medium">Book</th>
+                    <th class="pb-3 font-medium">Borrowed Date</th>
+                    <th class="pb-3 font-medium">Due Date</th>
+                    <th class="pb-3 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border">
+                  @for (loan of stats()?.recentLoans || []; track loan._id) {
+                    <tr>
+                      <td class="py-3 font-medium">{{ loan.user?.name }}</td>
+                      <td>{{ loan.book.title }}</td>
+                      <td>{{ formatDate(loan.borrowDate) }}</td>
+                      <td>{{ formatDate(loan.dueDate) }}</td>
+                      <td>
+                        <span
+                          class="rounded-full px-3 py-1 text-xs font-semibold"
+                          [class.bg-destructive/10]="loan.status === 'OVERDUE'"
+                          [class.text-destructive]="loan.status === 'OVERDUE'"
+                          [class.bg-primary/10]="loan.status !== 'OVERDUE'"
+                          [class.text-primary]="loan.status !== 'OVERDUE'"
+                        >
+                          {{ loan.status }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <div class="text-center text-muted-foreground">No recent activity</div>
+          }
+        </div>
+      </div>
+    }
+  </main>
+</div>
