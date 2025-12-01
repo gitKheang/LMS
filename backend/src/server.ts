@@ -75,12 +75,13 @@ const startServer = async () => {
     const dbName = process.env.DATABASE_NAME || "library";
     await database.connect(mongoUri, dbName);
 
-    // Start Express server
-    app.listen(PORT, () => {
+    // Start Express server - bind to 0.0.0.0 for Railway/Docker
+    const HOST = "0.0.0.0";
+    app.listen(Number(PORT), HOST, () => {
       console.log(`========================================`);
       console.log(`Library Management Backend Server`);
       console.log(`========================================`);
-      console.log(`✓ Server running on port ${PORT}`);
+      console.log(`✓ Server running on ${HOST}:${PORT}`);
       console.log(`✓ Environment: ${process.env.NODE_ENV || "development"}`);
       console.log(`✓ API: http://localhost:${PORT}/api`);
       console.log(`✓ Health: http://localhost:${PORT}/health`);
