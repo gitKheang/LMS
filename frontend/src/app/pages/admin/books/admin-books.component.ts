@@ -48,6 +48,13 @@ export class AdminBooksComponent implements OnInit {
     this.editingBook() ? "Edit Book" : "Add New Book"
   );
 
+  readonly submitButtonLabel = computed(() => {
+    if (this.submitting()) {
+      return "Saving…";
+    }
+    return this.editingBook() ? "Update Book" : "Create Book";
+  });
+
   ngOnInit() {
     this.loadBooks();
 
@@ -251,12 +258,5 @@ export class AdminBooksComponent implements OnInit {
     } finally {
       this.deletingBookId.set(null);
     }
-  }
-
-  get submitButtonLabel() {
-    if (this.submitting()) {
-      return "Saving…";
-    }
-    return this.editingBook() ? "Update Book" : "Create Book";
   }
 }
