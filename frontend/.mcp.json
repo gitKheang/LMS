@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "MongoDB": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mongodb-mcp-server",
+        "--connectionString",
+        "mongodb+srv://admin:admin@library-db.hgo6dun.mongodb.net/",
+        "--readOnly"
+      ]
+    }
+  }
+}
+

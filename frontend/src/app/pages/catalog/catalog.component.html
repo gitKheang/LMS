@@ -39,12 +39,16 @@
         @for (book of books(); track book._id) {
           <a [routerLink]="['/books', book._id]" class="block rounded-md border border-border/80 bg-card/90 p-3 shadow-sm transition hover:shadow-md text-sm">
             <div class="mb-2 flex aspect-[3/5] w-full items-center justify-center overflow-hidden rounded-md border border-border/60 bg-muted">
-              <img
-                [src]="book.imageUrl || placeholderCover"
-                [alt]="book.title + ' cover'"
-                class="h-full w-full object-cover"
-                loading="lazy"
-              />
+              @if (book.imageUrl) {
+                <img
+                  [src]="book.imageUrl"
+                  [alt]="book.title + ' cover'"
+                  class="h-full w-full object-cover"
+                  loading="lazy"
+                />
+              } @else {
+                <lucide-icon name="book-open" class="h-16 w-16 text-muted-foreground"></lucide-icon>
+              }
             </div>
             <div class="mb-2 flex items-center justify-between">
               <span class="rounded-full bg-secondary/90 px-2 py-0.5 text-[10px] font-semibold text-secondary-foreground">{{ book.category }}</span>

@@ -26,8 +26,6 @@ export class CatalogComponent implements OnInit {
   readonly books = signal<BookWithAvailability[]>([]);
   readonly categories = signal<string[]>([]);
   readonly isLoading = signal(true);
-  readonly placeholderCover =
-    'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=400&q=80';
 
   ngOnInit() {
     this.loadCategories();
@@ -37,7 +35,9 @@ export class CatalogComponent implements OnInit {
       .pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.loadBooks());
 
-    this.categoryControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.loadBooks());
+    this.categoryControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadBooks());
   }
 
   async loadCategories() {
@@ -52,10 +52,17 @@ export class CatalogComponent implements OnInit {
   async loadBooks() {
     this.isLoading.set(true);
     try {
-      const books = await this.api.getBooks(this.searchControl.value.trim(), this.categoryControl.value);
+      const books = await this.api.getBooks(
+        this.searchControl.value.trim(),
+        this.categoryControl.value
+      );
       this.books.set(books);
     } catch (error) {
-      this.toast.show({ title: 'Failed to load books', description: 'Please try again later', variant: 'destructive' });
+      this.toast.show({
+        title: 'Failed to load books',
+        description: 'Please try again later',
+        variant: 'destructive',
+      });
     } finally {
       this.isLoading.set(false);
     }

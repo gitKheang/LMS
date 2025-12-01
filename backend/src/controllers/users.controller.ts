@@ -1,0 +1,219 @@
+import { Request, Response } from "express";
+import { Filter } from "mongodb";
+import bcrypt from "bcryptjs";
+import { database } from "../config/database";
+import { AuthRequest } from "../middleware/auth";
+
+const generateId = () =>
+  Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+export const getAdminUsers = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const db = database.getDb();
+    const users = db.collection("users");
+
+    const results = await users
+      .find({}, { projection: { passwordHash: 0 } })
+      .toArray();
+
+    res.json(results);
+  } catch (error: any) {
+    console.error("Get admin users error:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to get users", error: error.message });
+  }
+};
+
+export const createStaffMember = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { name, email, password } = req.body;
+    const db = database.getDb();
+    const users = db.collection("users");
+
+    // Check if email exists
+    const existing = await users.findOne({ email: email.toLowerCase() });
+    if (existing) {
+      res.status(400).json({ message: "Email already exists" });
+      return;
+    }
+
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const now = new Date();
+    const newStaff = {
+      _id: generateId(),
+      name,
+      email: email.toLowerCase(),
+      passwordHash,
+      role: "STAFF",
+      status: "ACTIVE",
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+    };
+
+    await users.insertOne(newStaff as any);
+
+    // Remove password hash from response
+    const { passwordHash: _, ...userWithoutPassword } = newStaff;
+
+    res.status(201).json(userWithoutPassword);
+  } catch (error: any) {
+    console.error("Create staff member error:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to create staff member", error: error.message });
+  }
+};
+
+export const deleteUser = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const requesterId = req.user?.userId;
+    const requesterRole = req.user?.role;
+
+    const db = database.getDb();
+    const users = db.collection("users");
+    const loans = db.collection("loans");
+    const copies = db.collection("bookCopies");
+
+    const targetUser = await users.findOne({ _id: id } as Filter<any>);
+    if (!targetUser) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    if (String(targetUser._id) === requesterId) {
+      res.status(400).json({ message: "You cannot delete your own account" });
+      return;
+    }
+
+    if (targetUser.role === "ADMIN" && requesterRole !== "ADMIN") {
+      res
+        .status(403)
+        .json({ message: "Only administrators can remove another admin" });
+      return;
+    }
+
+    if (targetUser.role === "STAFF" && requesterRole !== "ADMIN") {
+      res
+        .status(403)
+        .json({ message: "Only administrators can remove staff members" });
+      return;
+    }
+
+    // Free any borrowed copies
+    const userLoans = await loans
+      .find({ userId: id, status: { $in: ["BORROWED", "OVERDUE"] } })
+      .toArray();
+
+    for (const loan of userLoans) {
+      await copies.updateOne(
+        { _id: loan.copyId },
+        { $set: { status: "AVAILABLE", updatedAt: new Date().toISOString() } }
+      );
+    }
+
+    // Delete user's loans
+    await loans.deleteMany({ userId: id });
+
+    // Delete user
+    await users.deleteOne({ _id: id } as Filter<any>);
+
+    res.status(204).send();
+  } catch (error: any) {
+    console.error("Delete user error:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to delete user", error: error.message });
+  }
+};
+
+export const requestPasswordReset = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { email } = req.body;
+    const db = database.getDb();
+    const users = db.collection("users");
+
+    const user = await users.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    if (user.role !== "USER") {
+      res.status(400).json({
+        message: "Only student accounts can request a reset through this form",
+      });
+      return;
+    }
+
+    await users.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          needsPasswordReset: true,
+          updatedAt: new Date().toISOString(),
+        },
+      }
+    );
+
+    res.status(204).send();
+  } catch (error: any) {
+    console.error("Request password reset error:", error);
+    res.status(500).json({
+      message: "Failed to request password reset",
+      error: error.message,
+    });
+  }
+};
+
+export const resetUserPassword = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    const db = database.getDb();
+    const users = db.collection("users");
+
+    const user = await users.findOne({ _id: id } as Filter<any>);
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    // Hash password
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await users.updateOne({ _id: id } as Filter<any>, {
+      $set: {
+        passwordHash,
+        needsPasswordReset: false,
+        updatedAt: new Date().toISOString(),
+      },
+    });
+
+    res.status(204).send();
+  } catch (error: any) {
+    console.error("Reset user password error:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to reset password", error: error.message });
+  }
+};
