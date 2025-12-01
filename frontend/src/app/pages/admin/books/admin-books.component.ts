@@ -27,6 +27,9 @@ export class AdminBooksComponent implements OnInit {
   readonly editingBook = signal<BookWithAvailability | null>(null);
   readonly submitting = signal(false);
   readonly deletingBookId = signal<string | null>(null);
+  
+  // Simple string for immediate button text rendering
+  buttonText = "Create Book";
 
   readonly form = this.fb.group({
     title: ["", Validators.required],
@@ -79,6 +82,7 @@ export class AdminBooksComponent implements OnInit {
 
   openCreateDialog() {
     this.editingBook.set(null);
+    this.buttonText = "Create Book";
     this.form.reset({
       title: "",
       author: "",
@@ -96,6 +100,7 @@ export class AdminBooksComponent implements OnInit {
 
   openEditDialog(book: BookWithAvailability) {
     this.editingBook.set(book);
+    this.buttonText = "Update Book";
     this.form.patchValue({
       title: book.title,
       author: book.author,
