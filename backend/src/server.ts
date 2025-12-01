@@ -20,10 +20,13 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:4200")
 console.log("Allowed CORS origins:", allowedOrigins);
 
 const corsOptions = {
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+  origin: (
+    origin: string | undefined,
+    callback: (err: Error | null, allow?: boolean) => void
+  ) => {
     // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
-    
+
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -43,9 +46,11 @@ app.options("*", cors(corsOptions));
 app.use(cors(corsOptions));
 
 // Security middleware - after CORS
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-}));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 
 // Rate limiting
 const limiter = rateLimit({
