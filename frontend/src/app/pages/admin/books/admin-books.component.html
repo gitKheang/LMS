@@ -211,10 +211,10 @@
                   <span class="text-xs text-muted-foreground">PNG, JPG, or SVG up to 2MB</span>
                   <input type="file" accept="image/*" class="sr-only" (change)="handleImageSelected($event)" />
                 </label>
-                <div>
+                <div class="text-center">
                   <span class="text-sm font-medium">Preview</span>
                   @if (form.get('includeCover')?.value) {
-                    <div class="mt-2 flex items-center justify-center overflow-hidden rounded-lg border border-border bg-gradient-to-b from-muted/30 to-muted/60" style="width: 120px; height: 170px;">
+                    <div class="mt-2 mx-auto flex items-center justify-center overflow-hidden rounded-lg border border-border bg-gradient-to-b from-muted/30 to-muted/60 shadow-sm" style="width: 140px; height: 200px;">
                       @if (form.get('imageUrl')?.value) {
                         <img [src]="form.get('imageUrl')?.value" alt="Book cover preview" class="h-full w-full object-cover" />
                       } @else {
@@ -225,7 +225,7 @@
                       }
                     </div>
                   } @else {
-                    <div class="mt-2 flex items-center justify-center rounded-lg border border-dashed border-border bg-background/50 text-center text-xs text-muted-foreground" style="width: 120px; height: 170px;">
+                    <div class="mt-2 mx-auto flex items-center justify-center rounded-lg border border-dashed border-border bg-background/50 text-center text-xs text-muted-foreground" style="width: 140px; height: 200px;">
                       <div class="flex flex-col items-center p-3">
                         <lucide-icon name="image-off" class="h-8 w-8 text-muted-foreground/40 mb-2"></lucide-icon>
                         <span class="text-[10px] leading-tight">No cover</span>
