@@ -27,7 +27,7 @@ export class AdminBooksComponent implements OnInit {
   readonly editingBook = signal<BookWithAvailability | null>(null);
   readonly submitting = signal(false);
   readonly deletingBookId = signal<string | null>(null);
-  
+
   // Simple string for immediate button text rendering
   buttonText = "Create Book";
 
