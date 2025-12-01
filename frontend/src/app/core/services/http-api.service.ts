@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
-import { LibraryApi } from '@core/api/library-api.types';
+import { Injectable, inject } from "@angular/core";
+import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
+import { firstValueFrom } from "rxjs";
+import { LibraryApi } from "@core/api/library-api.types";
 import {
   AuthResponse,
   BookWithAvailability,
@@ -9,23 +9,24 @@ import {
   CreateLoanPayload,
   DashboardStats,
   LoanWithRelations,
+  Notification,
   UpdateBookPayload,
   User,
   UserRole,
-} from '@core/models/library.models';
-import { API_CONFIG } from '../config/api.config';
+} from "@core/models/library.models";
+import { API_CONFIG } from "../config/api.config";
 
 /**
  * HTTP-based implementation of LibraryApi
  * Communicates with Express backend REST API
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class HttpApiService implements LibraryApi {
   private http = inject(HttpClient);
   private baseUrl = API_CONFIG.baseUrl;
 
   private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('library-token');
+    const token = localStorage.getItem("library-token");
     if (token) {
       return new HttpHeaders({ Authorization: `Bearer ${token}` });
     }
@@ -74,10 +75,13 @@ export class HttpApiService implements LibraryApi {
     );
   }
 
-  async getBooks(search?: string, category?: string): Promise<BookWithAvailability[]> {
+  async getBooks(
+    search?: string,
+    category?: string
+  ): Promise<BookWithAvailability[]> {
     let params = new HttpParams();
-    if (search) params = params.set('search', search);
-    if (category) params = params.set('category', category);
+    if (search) params = params.set("search", search);
+    if (category) params = params.set("category", category);
 
     return firstValueFrom(
       this.http.get<BookWithAvailability[]>(`${this.baseUrl}/books`, { params })
@@ -92,7 +96,7 @@ export class HttpApiService implements LibraryApi {
 
   async getAdminBooks(search?: string): Promise<BookWithAvailability[]> {
     let params = new HttpParams();
-    if (search) params = params.set('search', search);
+    if (search) params = params.set("search", search);
 
     return firstValueFrom(
       this.http.get<BookWithAvailability[]>(`${this.baseUrl}/admin/books`, {
@@ -104,9 +108,13 @@ export class HttpApiService implements LibraryApi {
 
   async createBook(payload: CreateBookPayload): Promise<BookWithAvailability> {
     return firstValueFrom(
-      this.http.post<BookWithAvailability>(`${this.baseUrl}/admin/books`, payload, {
-        headers: this.getAuthHeaders(),
-      })
+      this.http.post<BookWithAvailability>(
+        `${this.baseUrl}/admin/books`,
+        payload,
+        {
+          headers: this.getAuthHeaders(),
+        }
+      )
     );
   }
 
@@ -133,9 +141,12 @@ export class HttpApiService implements LibraryApi {
 
   async getAvailableBooksForLoans(): Promise<BookWithAvailability[]> {
     return firstValueFrom(
-      this.http.get<BookWithAvailability[]>(`${this.baseUrl}/books/available-for-loans`, {
-        headers: this.getAuthHeaders(),
-      })
+      this.http.get<BookWithAvailability[]>(
+        `${this.baseUrl}/books/available-for-loans`,
+        {
+          headers: this.getAuthHeaders(),
+        }
+      )
     );
   }
 
@@ -143,9 +154,12 @@ export class HttpApiService implements LibraryApi {
 
   async getLoansForUser(userId: string): Promise<LoanWithRelations[]> {
     return firstValueFrom(
-      this.http.get<LoanWithRelations[]>(`${this.baseUrl}/loans/user/${userId}`, {
-        headers: this.getAuthHeaders(),
-      })
+      this.http.get<LoanWithRelations[]>(
+        `${this.baseUrl}/loans/user/${userId}`,
+        {
+          headers: this.getAuthHeaders(),
+        }
+      )
     );
   }
 
@@ -159,17 +173,25 @@ export class HttpApiService implements LibraryApi {
 
   async createLoan(payload: CreateLoanPayload): Promise<LoanWithRelations> {
     return firstValueFrom(
-      this.http.post<LoanWithRelations>(`${this.baseUrl}/admin/loans`, payload, {
-        headers: this.getAuthHeaders(),
-      })
+      this.http.post<LoanWithRelations>(
+        `${this.baseUrl}/admin/loans`,
+        payload,
+        {
+          headers: this.getAuthHeaders(),
+        }
+      )
     );
   }
 
   async returnLoan(loanId: string): Promise<void> {
     await firstValueFrom(
-      this.http.post<void>(`${this.baseUrl}/admin/loans/${loanId}/return`, {}, {
-        headers: this.getAuthHeaders(),
-      })
+      this.http.post<void>(
+        `${this.baseUrl}/admin/loans/${loanId}/return`,
+        {},
+        {
+          headers: this.getAuthHeaders(),
+        }
+      )
     );
   }
 
@@ -183,9 +205,13 @@ export class HttpApiService implements LibraryApi {
 
   async sendOverdueReminder(loanId: string): Promise<void> {
     await firstValueFrom(
-      this.http.post<void>(`${this.baseUrl}/admin/loans/${loanId}/remind`, {}, {
-        headers: this.getAuthHeaders(),
-      })
+      this.http.post<void>(
+        `${this.baseUrl}/admin/loans/${loanId}/remind`,
+        {},
+        {
+          headers: this.getAuthHeaders(),
+        }
+      )
     );
   }
 
@@ -227,7 +253,9 @@ export class HttpApiService implements LibraryApi {
 
   async requestPasswordReset(email: string): Promise<void> {
     await firstValueFrom(
-      this.http.post<void>(`${this.baseUrl}/users/request-password-reset`, { email })
+      this.http.post<void>(`${this.baseUrl}/users/request-password-reset`, {
+        email,
+      })
     );
   }
 
@@ -244,6 +272,62 @@ export class HttpApiService implements LibraryApi {
   // ========== UTILITY ==========
 
   resetLibraryData(): void {
-    console.warn('resetLibraryData is not available for HTTP API');
+    console.warn("resetLibraryData is not available for HTTP API");
+  }
+
+  // ========== NOTIFICATIONS ==========
+
+  async getNotifications(): Promise<Notification[]> {
+    return firstValueFrom(
+      this.http.get<Notification[]>(`${this.baseUrl}/notifications`, {
+        headers: this.getAuthHeaders(),
+      })
+    );
+  }
+
+  async getUnreadNotificationCount(): Promise<{ count: number }> {
+    return firstValueFrom(
+      this.http.get<{ count: number }>(
+        `${this.baseUrl}/notifications/unread-count`,
+        {
+          headers: this.getAuthHeaders(),
+        }
+      )
+    );
+  }
+
+  async markNotificationAsRead(notificationId: string): Promise<void> {
+    await firstValueFrom(
+      this.http.post<void>(
+        `${this.baseUrl}/notifications/${notificationId}/read`,
+        {},
+        {
+          headers: this.getAuthHeaders(),
+        }
+      )
+    );
+  }
+
+  async markAllNotificationsAsRead(): Promise<void> {
+    await firstValueFrom(
+      this.http.post<void>(
+        `${this.baseUrl}/notifications/read-all`,
+        {},
+        {
+          headers: this.getAuthHeaders(),
+        }
+      )
+    );
+  }
+
+  async deleteNotification(notificationId: string): Promise<void> {
+    await firstValueFrom(
+      this.http.delete<void>(
+        `${this.baseUrl}/notifications/${notificationId}`,
+        {
+          headers: this.getAuthHeaders(),
+        }
+      )
+    );
   }
 }

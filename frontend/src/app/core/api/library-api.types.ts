@@ -5,13 +5,19 @@ import {
   CreateLoanPayload,
   DashboardStats,
   LoanWithRelations,
+  Notification,
   UpdateBookPayload,
   User,
   UserRole,
-} from '@core/models/library.models';
+} from "@core/models/library.models";
 
 export interface LibraryApi {
-  register(name: string, email: string, password: string, studentId?: string): Promise<AuthResponse>;
+  register(
+    name: string,
+    email: string,
+    password: string,
+    studentId?: string
+  ): Promise<AuthResponse>;
   login(email: string, password: string): Promise<AuthResponse>;
   getCurrentUser(token: string): Promise<User>;
   getCategories(): Promise<string[]>;
@@ -20,11 +26,22 @@ export interface LibraryApi {
   getLoansForUser(userId: string): Promise<LoanWithRelations[]>;
   getAdminBooks(search?: string): Promise<BookWithAvailability[]>;
   createBook(payload: CreateBookPayload): Promise<BookWithAvailability>;
-  updateBook(bookId: string, payload: UpdateBookPayload): Promise<BookWithAvailability>;
+  updateBook(
+    bookId: string,
+    payload: UpdateBookPayload
+  ): Promise<BookWithAvailability>;
   deleteBook(bookId: string): Promise<void>;
   getAdminUsers(): Promise<User[]>;
-  createStaffMember(name: string, email: string, password: string): Promise<User>;
-  deleteUser(userId: string, requesterId: string, requesterRole: UserRole): Promise<void>;
+  createStaffMember(
+    name: string,
+    email: string,
+    password: string
+  ): Promise<User>;
+  deleteUser(
+    userId: string,
+    requesterId: string,
+    requesterRole: UserRole
+  ): Promise<void>;
   getAdminLoans(): Promise<LoanWithRelations[]>;
   requestPasswordReset(email: string): Promise<void>;
   resetUserPassword(userId: string, newPassword: string): Promise<void>;
@@ -34,4 +51,10 @@ export interface LibraryApi {
   returnLoan(loanId: string): Promise<void>;
   getDashboardStats(): Promise<DashboardStats>;
   resetLibraryData(): void;
+  // Notifications
+  getNotifications(): Promise<Notification[]>;
+  getUnreadNotificationCount(): Promise<{ count: number }>;
+  markNotificationAsRead(notificationId: string): Promise<void>;
+  markAllNotificationsAsRead(): Promise<void>;
+  deleteNotification(notificationId: string): Promise<void>;
 }

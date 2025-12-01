@@ -26,6 +26,79 @@
 
         @if (auth.isAuthenticated()) {
           <ng-container>
+            <!-- Notification Bell -->
+            <div class="relative">
+              <button
+                type="button"
+                (click)="toggleNotifications()"
+                class="relative flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              >
+                <lucide-icon name="bell" class="h-5 w-5"></lucide-icon>
+                @if (unreadCount() > 0) {
+                  <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+                    {{ unreadCount() > 9 ? '9+' : unreadCount() }}
+                  </span>
+                }
+              </button>
+
+              <!-- Notification Dropdown -->
+              @if (showNotifications()) {
+                <div class="absolute right-0 top-full mt-2 w-80 rounded-lg border border-border bg-card shadow-lg z-50">
+                  <div class="flex items-center justify-between border-b border-border px-4 py-3">
+                    <h3 class="font-semibold text-foreground">Notifications</h3>
+                    @if (unreadCount() > 0) {
+                      <button
+                        type="button"
+                        (click)="markAllAsRead()"
+                        class="text-xs text-primary hover:underline"
+                      >
+                        Mark all as read
+                      </button>
+                    }
+                  </div>
+                  <div class="max-h-80 overflow-y-auto">
+                    @if (notifications().length === 0) {
+                      <div class="px-4 py-8 text-center text-muted-foreground">
+                        <lucide-icon name="bell-off" class="mx-auto h-8 w-8 mb-2 opacity-50"></lucide-icon>
+                        <p class="text-sm">No notifications</p>
+                      </div>
+                    } @else {
+                      @for (notification of notifications(); track notification._id) {
+                        <div
+                          class="flex items-start gap-3 border-b border-border px-4 py-3 hover:bg-muted/50 cursor-pointer transition-colors"
+                          [class.bg-primary/5]="!notification.isRead"
+                          (click)="markAsRead(notification)"
+                        >
+                          <div class="flex-shrink-0 mt-0.5">
+                            <div class="flex h-8 w-8 items-center justify-center rounded-full" [class]="notification.isRead ? 'bg-muted' : 'bg-destructive/10'">
+                              <lucide-icon name="alert-circle" class="h-4 w-4" [class]="notification.isRead ? 'text-muted-foreground' : 'text-destructive'"></lucide-icon>
+                            </div>
+                          </div>
+                          <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-foreground" [class.font-semibold]="!notification.isRead">
+                              {{ notification.title }}
+                            </p>
+                            <p class="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                              {{ notification.message }}
+                            </p>
+                            <p class="text-xs text-muted-foreground mt-1">
+                              {{ formatDate(notification.createdAt) }}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            (click)="deleteNotification(notification, $event)"
+                            class="flex-shrink-0 p-1 text-muted-foreground hover:text-destructive"
+                          >
+                            <lucide-icon name="x" class="h-3 w-3"></lucide-icon>
+                          </button>
+                        </div>
+                      }
+                    }
+                  </div>
+                </div>
+              }
+            </div>
 
             <div class="flex items-center gap-3">
               <div class="flex items-center gap-2 rounded-md bg-primary/10 px-3 py-1.5 text-primary">

@@ -67,17 +67,17 @@
                         <button
                           type="button"
                           class="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1 text-xs font-medium text-foreground hover:bg-muted"
-                          [disabled]="loan.reminderSent || remindingLoanId() === loan._id"
+                          [disabled]="remindingLoanId() === loan._id"
                           (click)="sendReminder(loan)"
                         >
                           <lucide-icon name="bell" class="h-3 w-3"></lucide-icon>
-                          {{
-                            remindingLoanId() === loan._id
-                              ? 'Sending…'
-                              : loan.reminderSent
-                                ? 'Reminder Sent'
-                                : 'Send Reminder'
-                          }}
+                          @if (remindingLoanId() === loan._id) {
+                            Sending…
+                          } @else if (loan.reminderCount && loan.reminderCount > 0) {
+                            Send Again ({{ loan.reminderCount }})
+                          } @else {
+                            Send Reminder
+                          }
                         </button>
                       } @else {
                         <span class="text-xs text-muted-foreground">-</span>

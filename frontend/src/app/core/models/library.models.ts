@@ -1,5 +1,5 @@
-export type UserRole = 'USER' | 'ADMIN' | 'STAFF';
-export type UserStatus = 'ACTIVE' | 'BLOCKED';
+export type UserRole = "USER" | "ADMIN" | "STAFF";
+export type UserStatus = "ACTIVE" | "BLOCKED";
 
 export interface User {
   _id: string;
@@ -38,12 +38,12 @@ export interface BookCopy {
   _id: string;
   bookId: string;
   copyCode: string;
-  status: 'AVAILABLE' | 'BORROWED' | 'LOST';
+  status: "AVAILABLE" | "BORROWED" | "MAINTENANCE";
   createdAt: string;
   updatedAt: string;
 }
 
-export type LoanStatus = 'BORROWED' | 'RETURNED' | 'OVERDUE';
+export type LoanStatus = "BORROWED" | "RETURNED" | "OVERDUE";
 
 export interface Loan {
   _id: string;
@@ -55,6 +55,8 @@ export interface Loan {
   returnDate: string | null;
   status: LoanStatus;
   reminderSent?: boolean;
+  reminderCount?: number;
+  lastReminderAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -90,7 +92,8 @@ export interface CreateBookPayload {
   imageUrl?: string;
 }
 
-export interface UpdateBookPayload extends Omit<CreateBookPayload, 'numberOfCopies'> {
+export interface UpdateBookPayload
+  extends Omit<CreateBookPayload, "numberOfCopies"> {
   numberOfCopies?: number;
 }
 
@@ -98,4 +101,19 @@ export interface CreateLoanPayload {
   userId: string;
   bookId: string;
   dueDate: string;
+}
+
+export interface Notification {
+  _id: string;
+  userId: string;
+  loanId: string;
+  bookId: string;
+  type: "OVERDUE_REMINDER";
+  title: string;
+  message: string;
+  bookTitle: string;
+  bookAuthor: string;
+  dueDate: string;
+  isRead: boolean;
+  createdAt: string;
 }
