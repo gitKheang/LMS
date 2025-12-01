@@ -12,38 +12,21 @@ import router from "./routes";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS configuration - MUST be before helmet and other middleware
+// CORS configuration - MUST be before all other middleware
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:4200")
   .split(",")
   .map((origin) => origin.trim());
 
 console.log("Allowed CORS origins:", allowedOrigins);
 
-const corsOptions = {
-  origin: (
-    origin: string | undefined,
-    callback: (err: Error | null, allow?: boolean) => void
-  ) => {
-    // Allow requests with no origin (mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log("CORS blocked origin:", origin);
-      callback(null, false);
-    }
-  },
+// Simple CORS setup that works reliably
+app.use(cors({
+  origin: allowedOrigins,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-};
-
-// Handle preflight OPTIONS requests first
-app.options("*", cors(corsOptions));
-
-// Apply CORS to all routes
-app.use(cors(corsOptions));
+  optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+}));
 
 // Security middleware - after CORS
 app.use(
