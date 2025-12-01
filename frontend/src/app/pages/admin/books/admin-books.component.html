@@ -214,16 +214,22 @@
                 <div>
                   <span class="text-sm font-medium">Preview</span>
                   @if (form.get('includeCover')?.value) {
-                    <div class="mt-2 h-36 flex items-center justify-center overflow-hidden rounded-lg border border-border bg-background">
+                    <div class="mt-2 flex items-center justify-center overflow-hidden rounded-lg border border-border bg-gradient-to-b from-muted/30 to-muted/60" style="width: 120px; height: 170px;">
                       @if (form.get('imageUrl')?.value) {
                         <img [src]="form.get('imageUrl')?.value" alt="Book cover preview" class="h-full w-full object-cover" />
                       } @else {
-                        <lucide-icon name="triangle" class="h-6 w-6 text-muted-foreground"></lucide-icon>
+                        <div class="flex flex-col items-center justify-center text-center p-3">
+                          <lucide-icon name="book-open" class="h-10 w-10 text-muted-foreground/50 mb-2"></lucide-icon>
+                          <span class="text-[10px] text-muted-foreground/70 leading-tight">Upload an image<br/>to preview</span>
+                        </div>
                       }
                     </div>
                   } @else {
-                    <div class="mt-2 rounded-lg border border-dashed border-border bg-background/50 px-4 py-6 text-center text-xs text-muted-foreground">
-                      Cover image skipped. Enable "Include cover" to upload one later.
+                    <div class="mt-2 flex items-center justify-center rounded-lg border border-dashed border-border bg-background/50 text-center text-xs text-muted-foreground" style="width: 120px; height: 170px;">
+                      <div class="flex flex-col items-center p-3">
+                        <lucide-icon name="image-off" class="h-8 w-8 text-muted-foreground/40 mb-2"></lucide-icon>
+                        <span class="text-[10px] leading-tight">No cover</span>
+                      </div>
                     </div>
                   }
                 </div>
