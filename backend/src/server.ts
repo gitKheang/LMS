@@ -3,45 +3,29 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 import { database } from "./config/database";
 import router from "./routes";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS configuration - MUST be before all other middleware
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:4200")
-  .split(",")
-  .map((origin) => origin.trim());
-
-console.log("Allowed CORS origins:", allowedOrigins);
-
-// Simple CORS setup that works reliably
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  optionsSuccessStatus: 200, // Some legacy browsers choke on 204
-}));
-
-// Security middleware - after CORS
-app.use(
-  helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-  })
-);
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: "Too many requests from this IP, please try again later",
+// CORS - Allow all origins for now (we can restrict later)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  
+  // Handle preflight
+  if (req.method === "OPTIONS") {
+    res.status(200).end();
+    return;
+  }
+  next();
 });
-app.use("/api", limiter);
 
 // Body parsing middleware - increased limit for image uploads
 app.use(express.json({ limit: "5mb" }));
