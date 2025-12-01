@@ -300,6 +300,7 @@ export const updateBook = async (
       const currentTotal = existingCopies.length;
 
       if (numberOfCopies > currentTotal) {
+        // Add more copies
         const copiesToAdd = numberOfCopies - currentTotal;
         const newCopies: any[] = [];
         const now = new Date().toISOString();
@@ -318,6 +319,30 @@ export const updateBook = async (
         if (newCopies.length > 0) {
           await copies.insertMany(newCopies as any);
         }
+      } else if (numberOfCopies < currentTotal) {
+        // Remove copies - only remove AVAILABLE ones
+        const copiesToRemove = currentTotal - numberOfCopies;
+        const availableCopies = existingCopies.filter(
+          (c) => c.status === "AVAILABLE"
+        );
+
+        if (availableCopies.length < copiesToRemove) {
+          res.status(400).json({
+            message: `Cannot reduce copies: only ${
+              availableCopies.length
+            } copies are available. ${
+              copiesToRemove - availableCopies.length
+            } more copies are currently borrowed.`,
+          });
+          return;
+        }
+
+        // Delete the specified number of available copies
+        const copyIdsToDelete = availableCopies
+          .slice(0, copiesToRemove)
+          .map((c) => c._id);
+
+        await copies.deleteMany({ _id: { $in: copyIdsToDelete } });
       }
     }
 
@@ -371,13 +396,28 @@ export const deleteBook = async (
     const copies = db.collection("bookCopies");
     const loans = db.collection("loans");
 
-    const result = await books.deleteOne({ _id: id } as Filter<any>);
-    if (result.deletedCount === 0) {
+    // Check if book exists
+    const book = await books.findOne({ _id: id } as Filter<any>);
+    if (!book) {
       res.status(404).json({ message: "Book not found" });
       return;
     }
 
-    // Delete associated copies and loans
+    // Check for active loans before deleting
+    const activeLoans = await loans.countDocuments({
+      bookId: id,
+      status: { $in: ["BORROWED", "OVERDUE"] },
+    });
+
+    if (activeLoans > 0) {
+      res.status(400).json({
+        message: `Cannot delete book: ${activeLoans} active loan(s) exist. Please wait for all copies to be returned.`,
+      });
+      return;
+    }
+
+    // Delete the book, copies, and loan history
+    await books.deleteOne({ _id: id } as Filter<any>);
     await copies.deleteMany({ bookId: id });
     await loans.deleteMany({ bookId: id });
 

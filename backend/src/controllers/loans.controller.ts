@@ -22,11 +22,27 @@ const enrichLoansWithStatus = (loans: any[]): any[] => {
 };
 
 export const getLoansForUser = async (
-  req: Request,
+  req: AuthRequest,
   res: Response
 ): Promise<void> => {
   try {
     const { userId } = req.params;
+
+    // Authorization check: users can only view their own loans unless admin/staff
+    if (!req.user) {
+      res.status(401).json({ message: "Not authenticated" });
+      return;
+    }
+
+    const isOwnLoans = req.user.userId === userId;
+    const isAdminOrStaff =
+      req.user.role === "ADMIN" || req.user.role === "STAFF";
+
+    if (!isOwnLoans && !isAdminOrStaff) {
+      res.status(403).json({ message: "You can only view your own loans" });
+      return;
+    }
+
     const db = database.getDb();
     const loans = db.collection("loans");
 
@@ -270,6 +286,9 @@ export const sendOverdueReminder = async (
     const { id } = req.params;
     const db = database.getDb();
     const loans = db.collection("loans");
+    const users = db.collection("users");
+    const books = db.collection("books");
+    const notifications = db.collection("notifications");
 
     const loan = await loans.findOne({ _id: id } as Filter<any>);
     if (!loan) {
@@ -287,9 +306,44 @@ export const sendOverdueReminder = async (
       return;
     }
 
+    // Get user and book details for the notification
+    const user = await users.findOne({ _id: loan.userId } as Filter<any>);
+    const book = await books.findOne({ _id: loan.bookId } as Filter<any>);
+
+    if (!user || !book) {
+      res.status(404).json({ message: "User or book not found" });
+      return;
+    }
+
+    // Create in-app notification for the user
+    const notification = {
+      _id: generateId(),
+      userId: loan.userId,
+      loanId: loan._id,
+      bookId: loan.bookId,
+      type: "OVERDUE_REMINDER",
+      title: "Book Return Reminder",
+      message: `Please return "${book.title}" by ${
+        book.author
+      }. This book was due on ${new Date(
+        loan.dueDate
+      ).toLocaleDateString()}. Please return it to the library as soon as possible.`,
+      bookTitle: book.title,
+      bookAuthor: book.author,
+      dueDate: loan.dueDate,
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    await notifications.insertOne(notification as any);
+
+    // Increment reminder count (allow multiple reminders)
+    const currentCount = loan.reminderCount || 0;
     await loans.updateOne({ _id: id } as Filter<any>, {
       $set: {
         reminderSent: true,
+        reminderCount: currentCount + 1,
+        lastReminderAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
     });

@@ -55,6 +55,7 @@ export const createStaffMember = async (
       passwordHash,
       role: "STAFF",
       status: "ACTIVE",
+      needsPasswordReset: false,
       createdAt: now.toISOString(),
       updatedAt: now.toISOString(),
     };

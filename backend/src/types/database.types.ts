@@ -51,6 +51,8 @@ export interface LoanDocument extends LibraryDocument {
   returnDate: string | null;
   status: "BORROWED" | "RETURNED" | "OVERDUE";
   reminderSent: boolean;
+  reminderCount?: number;
+  lastReminderAt?: string;
   createdAt: string;
   updatedAt: string;
 }
