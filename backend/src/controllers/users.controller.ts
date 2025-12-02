@@ -148,6 +148,7 @@ export const requestPasswordReset = async (
     const { email } = req.body;
     const db = database.getDb();
     const users = db.collection("users");
+    const notifications = db.collection("notifications");
 
     const user = await users.findOne({ email: email.toLowerCase() });
     if (!user) {
@@ -171,6 +172,26 @@ export const requestPasswordReset = async (
         },
       }
     );
+
+    // Create notifications for all admins and staff
+    const adminUsers = await users
+      .find({ role: { $in: ["ADMIN", "STAFF"] } })
+      .toArray();
+
+    const now = new Date().toISOString();
+    const notificationDocs = adminUsers.map((admin) => ({
+      _id: generateId(),
+      userId: admin._id,
+      title: "Password Reset Request",
+      message: `User ${user.name} (${user.email}) has requested a password reset.`,
+      type: "PASSWORD_RESET_REQUEST",
+      isRead: false,
+      createdAt: now,
+    }));
+
+    if (notificationDocs.length > 0) {
+      await notifications.insertMany(notificationDocs as any);
+    }
 
     res.status(204).send();
   } catch (error: any) {
