@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   Ban,
   Bell,
+  BellOff,
   BookMarked,
   BookOpen,
   Calendar,
@@ -12,6 +13,7 @@ import {
   Edit,
   Eye,
   EyeOff,
+  Key,
   LayoutDashboard,
   LogOut,
   MapPin,
@@ -22,6 +24,7 @@ import {
   Trash2,
   User,
   Users,
+  X,
 } from 'lucide-angular';
 
 export const lucideIcons = {
@@ -29,6 +32,7 @@ export const lucideIcons = {
   ArrowLeft,
   Ban,
   Bell,
+  BellOff,
   BookMarked,
   BookOpen,
   Calendar,
@@ -38,6 +42,7 @@ export const lucideIcons = {
   Edit,
   Eye,
   EyeOff,
+  Key,
   LayoutDashboard,
   LogOut,
   MapPin,
@@ -48,4 +53,5 @@ export const lucideIcons = {
   Trash2,
   User,
   Users,
+  X,
 };
