@@ -148,6 +148,8 @@ export const createLoan = async (
     const db = database.getDb();
     const copies = db.collection("bookCopies");
     const loans = db.collection("loans");
+    const books = db.collection("books");
+    const notifications = db.collection("notifications");
 
     // Find and update available copy
     const availableCopy = await copies.findOneAndUpdate(
@@ -166,6 +168,9 @@ export const createLoan = async (
       return;
     }
 
+    // Get book details for notification
+    const book = await books.findOne({ _id: bookId } as any);
+
     // Create loan
     const now = new Date();
     const newLoan = {
@@ -183,6 +188,25 @@ export const createLoan = async (
     };
 
     await loans.insertOne(newLoan as any);
+
+    // Create notification for the user about the new loan
+    if (book) {
+      const notification = {
+        _id: generateId(),
+        userId: userId,
+        loanId: newLoan._id,
+        bookId: bookId,
+        type: "LOAN_CREATED",
+        title: "Book Borrowed Successfully",
+        message: `You have borrowed "${book.title}" by ${book.author}. Please return it by ${new Date(dueDate).toLocaleDateString()}.`,
+        bookTitle: book.title,
+        bookAuthor: book.author,
+        dueDate: new Date(dueDate).toISOString(),
+        isRead: false,
+        createdAt: now.toISOString(),
+      };
+      await notifications.insertOne(notification as any);
+    }
 
     // Fetch with relations
     const enriched = await loans

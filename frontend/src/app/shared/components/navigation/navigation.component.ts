@@ -200,6 +200,51 @@ export class NavigationComponent implements OnInit, OnDestroy {
     return date.toLocaleDateString();
   }
 
+  getNotificationIcon(notification: Notification): string {
+    switch (notification.type) {
+      case "OVERDUE_REMINDER":
+        return "alert-circle";
+      case "PASSWORD_RESET_REQUEST":
+        return "key";
+      case "LOAN_CREATED":
+        return "book-open";
+      default:
+        return "bell";
+    }
+  }
+
+  getNotificationIconClass(notification: Notification): string {
+    if (notification.isRead) {
+      return "bg-muted";
+    }
+    switch (notification.type) {
+      case "OVERDUE_REMINDER":
+        return "bg-destructive/10";
+      case "PASSWORD_RESET_REQUEST":
+        return "bg-orange-500/10";
+      case "LOAN_CREATED":
+        return "bg-primary/10";
+      default:
+        return "bg-primary/10";
+    }
+  }
+
+  getNotificationIconColorClass(notification: Notification): string {
+    if (notification.isRead) {
+      return "text-muted-foreground";
+    }
+    switch (notification.type) {
+      case "OVERDUE_REMINDER":
+        return "text-destructive";
+      case "PASSWORD_RESET_REQUEST":
+        return "text-orange-500";
+      case "LOAN_CREATED":
+        return "text-primary";
+      default:
+        return "text-primary";
+    }
+  }
+
   async logout() {
     this.authService.logout();
     await this.router.navigateByUrl("/");
