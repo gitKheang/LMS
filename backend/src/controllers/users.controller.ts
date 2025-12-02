@@ -87,6 +87,7 @@ export const deleteUser = async (
     const users = db.collection("users");
     const loans = db.collection("loans");
     const copies = db.collection("bookCopies");
+    const notifications = db.collection("notifications");
 
     const targetUser = await users.findOne({ _id: id } as Filter<any>);
     if (!targetUser) {
@@ -127,6 +128,16 @@ export const deleteUser = async (
 
     // Delete user's loans
     await loans.deleteMany({ userId: id });
+
+    // Delete notifications for this user (notifications they received)
+    await notifications.deleteMany({ userId: id });
+
+    // Delete notifications about this user (e.g., password reset requests)
+    // These are notifications sent to admins that contain this user's email
+    await notifications.deleteMany({
+      type: "PASSWORD_RESET_REQUEST",
+      message: { $regex: targetUser.email, $options: "i" },
+    });
 
     // Delete user
     await users.deleteOne({ _id: id } as Filter<any>);
