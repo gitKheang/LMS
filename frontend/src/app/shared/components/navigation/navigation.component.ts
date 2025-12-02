@@ -144,6 +144,43 @@ export class NavigationComponent implements OnInit, OnDestroy {
     }
   }
 
+  async handleNotificationClick(notification: Notification) {
+    // Mark as read
+    try {
+      if (!notification.isRead) {
+        await this.api.markNotificationAsRead(notification._id);
+        this.notifications.update((list) =>
+          list.map((n) =>
+            n._id === notification._id ? { ...n, isRead: true } : n
+          )
+        );
+        this.unreadCount.update((c) => Math.max(0, c - 1));
+      }
+    } catch (error) {
+      console.error("Failed to mark as read:", error);
+    }
+
+    // Navigate to relevant page based on notification type
+    const route = this.getNotificationRoute(notification);
+    if (route) {
+      this.showNotifications.set(false);
+      await this.router.navigateByUrl(route);
+    }
+  }
+
+  getNotificationRoute(notification: Notification): string | null {
+    switch (notification.type) {
+      case "PASSWORD_RESET_REQUEST":
+        return "/admin/users";
+      case "OVERDUE_REMINDER":
+        return "/my-account";
+      case "LOAN_CREATED":
+        return "/my-account";
+      default:
+        return null;
+    }
+  }
+
   async markAsRead(notification: Notification) {
     try {
       await this.api.markNotificationAsRead(notification._id);

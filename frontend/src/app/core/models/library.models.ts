@@ -103,10 +103,10 @@ export interface CreateLoanPayload {
   dueDate: string;
 }
 
-export type NotificationType = 
-  | "OVERDUE_REMINDER" 
-  | "PASSWORD_RESET_REQUEST" 
-  | "LOAN_CREATED" 
+export type NotificationType =
+  | "OVERDUE_REMINDER"
+  | "PASSWORD_RESET_REQUEST"
+  | "LOAN_CREATED"
   | "GENERAL";
 
 export interface Notification {

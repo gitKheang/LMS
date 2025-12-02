@@ -198,7 +198,9 @@ export const createLoan = async (
         bookId: bookId,
         type: "LOAN_CREATED",
         title: "Book Borrowed Successfully",
-        message: `You have borrowed "${book.title}" by ${book.author}. Please return it by ${new Date(dueDate).toLocaleDateString()}.`,
+        message: `You have borrowed "${book.title}" by ${
+          book.author
+        }. Please return it by ${new Date(dueDate).toLocaleDateString()}.`,
         bookTitle: book.title,
         bookAuthor: book.author,
         dueDate: new Date(dueDate).toISOString(),
