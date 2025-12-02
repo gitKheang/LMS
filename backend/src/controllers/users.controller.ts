@@ -250,3 +250,61 @@ export const resetUserPassword = async (
       .json({ message: "Failed to reset password", error: error.message });
   }
 };
+
+export const changePassword = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      res.status(401).json({ message: "Not authenticated" });
+      return;
+    }
+
+    if (!currentPassword || !newPassword) {
+      res.status(400).json({ message: "Current password and new password are required" });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      res.status(400).json({ message: "New password must be at least 6 characters" });
+      return;
+    }
+
+    const db = database.getDb();
+    const users = db.collection("users");
+
+    const user = await users.findOne({ _id: userId } as Filter<any>);
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    // Verify current password
+    const isValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isValid) {
+      res.status(400).json({ message: "Current password is incorrect" });
+      return;
+    }
+
+    // Hash new password
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await users.updateOne({ _id: userId } as Filter<any>, {
+      $set: {
+        passwordHash,
+        updatedAt: new Date().toISOString(),
+      },
+    });
+
+    res.status(204).send();
+  } catch (error: any) {
+    console.error("Change password error:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to change password", error: error.message });
+  }
+};

@@ -597,4 +597,14 @@ export class MockApiService implements LibraryApi {
   async deleteNotification(notificationId: string): Promise<void> {
     await this.simulateDelay(50);
   }
+
+  // ========== CHANGE PASSWORD (Mock) ==========
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await this.simulateDelay(200);
+    // In mock mode, just simulate success
+    if (newPassword.length < 6) {
+      throw new Error("New password must be at least 6 characters");
+    }
+  }
 }

@@ -57,4 +57,6 @@ export interface LibraryApi {
   markNotificationAsRead(notificationId: string): Promise<void>;
   markAllNotificationsAsRead(): Promise<void>;
   deleteNotification(notificationId: string): Promise<void>;
+  // Change password
+  changePassword(currentPassword: string, newPassword: string): Promise<void>;
 }

@@ -110,6 +110,11 @@ router.post(
   usersController.requestPasswordReset
 );
 router.post(
+  "/users/change-password",
+  authenticate,
+  usersController.changePassword
+);
+router.post(
   "/admin/users/:id/reset-password",
   authenticate,
   requireRole("ADMIN", "STAFF"),

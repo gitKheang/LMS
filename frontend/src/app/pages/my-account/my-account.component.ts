@@ -1,25 +1,42 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnInit, computed, inject, signal } from "@angular/core";
+import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { format, parseISO } from "date-fns";
 import { LIBRARY_API } from "@core/api/library-api.token";
 import { LoanWithRelations, Notification } from "@core/models/library.models";
 import { AuthService } from "@core/services/auth.service";
+import { ToastService } from "@core/services/toast.service";
 import { LucideAngularModule } from "lucide-angular";
 
 @Component({
   selector: "app-my-account",
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, ReactiveFormsModule],
   templateUrl: "./my-account.component.html",
 })
 export class MyAccountComponent implements OnInit {
   private readonly api = inject(LIBRARY_API);
+  private readonly fb = inject(FormBuilder);
+  private readonly toast = inject(ToastService);
   readonly auth = inject(AuthService);
 
   readonly loans = signal<LoanWithRelations[]>([]);
   readonly notifications = signal<Notification[]>([]);
   readonly isLoading = signal(true);
   readonly activeTab = signal<"current" | "history">("current");
+  
+  // Change password
+  readonly showChangePassword = signal(false);
+  readonly isChangingPassword = signal(false);
+  readonly showCurrentPassword = signal(false);
+  readonly showNewPassword = signal(false);
+  readonly showConfirmPassword = signal(false);
+
+  readonly passwordForm = this.fb.group({
+    currentPassword: ["", [Validators.required]],
+    newPassword: ["", [Validators.required, Validators.minLength(6)]],
+    confirmPassword: ["", [Validators.required]],
+  });
 
   readonly currentLoans = computed(() =>
     this.loans().filter(
@@ -136,5 +153,66 @@ export class MyAccountComponent implements OnInit {
       return "Returned";
     }
     return "Active";
+  }
+
+  // ========== CHANGE PASSWORD ==========
+
+  openChangePassword() {
+    this.passwordForm.reset();
+    this.showChangePassword.set(true);
+  }
+
+  closeChangePassword() {
+    this.showChangePassword.set(false);
+    this.passwordForm.reset();
+  }
+
+  toggleCurrentPasswordVisibility() {
+    this.showCurrentPassword.update((v) => !v);
+  }
+
+  toggleNewPasswordVisibility() {
+    this.showNewPassword.update((v) => !v);
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword.update((v) => !v);
+  }
+
+  async submitChangePassword() {
+    if (this.passwordForm.invalid) {
+      this.passwordForm.markAllAsTouched();
+      return;
+    }
+
+    const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
+
+    if (newPassword !== confirmPassword) {
+      this.toast.show({
+        title: "Error",
+        description: "New passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    this.isChangingPassword.set(true);
+    try {
+      await this.api.changePassword(currentPassword!, newPassword!);
+      this.toast.show({
+        title: "Success",
+        description: "Your password has been changed successfully",
+      });
+      this.closeChangePassword();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to change password";
+      this.toast.show({
+        title: "Error",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      this.isChangingPassword.set(false);
+    }
   }
 }

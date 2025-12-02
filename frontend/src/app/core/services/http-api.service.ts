@@ -330,4 +330,16 @@ export class HttpApiService implements LibraryApi {
       )
     );
   }
+
+  // ========== CHANGE PASSWORD ==========
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await firstValueFrom(
+      this.http.post<void>(
+        `${this.baseUrl}/users/change-password`,
+        { currentPassword, newPassword },
+        { headers: this.getAuthHeaders() }
+      )
+    );
+  }
 }

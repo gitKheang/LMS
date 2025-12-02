@@ -47,7 +47,17 @@
     }
 
     <div class="mb-8 rounded-lg border border-border bg-card p-6">
-      <h2 class="text-lg font-semibold text-card-foreground">Account Information</h2>
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-card-foreground">Account Information</h2>
+        <button
+          type="button"
+          (click)="openChangePassword()"
+          class="inline-flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+        >
+          <lucide-icon name="key" class="h-4 w-4"></lucide-icon>
+          Change Password
+        </button>
+      </div>
       <div class="mt-4 space-y-2 text-sm">
         <div class="flex items-center justify-between">
           <span class="text-muted-foreground">Name:</span>
@@ -211,4 +221,94 @@
       </div>
     </div>
   </main>
+
+  <!-- Change Password Modal -->
+  @if (showChangePassword()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div class="w-full max-w-md rounded-xl border border-border bg-card shadow-2xl">
+        <div class="flex items-center justify-between border-b border-border px-6 py-4">
+          <div>
+            <h2 class="text-xl font-semibold text-card-foreground">Change Password</h2>
+            <p class="text-sm text-muted-foreground">Enter your current password and choose a new one</p>
+          </div>
+          <button type="button" class="text-muted-foreground hover:text-foreground" (click)="closeChangePassword()">✕</button>
+        </div>
+        <form class="space-y-4 px-6 py-6" [formGroup]="passwordForm" (ngSubmit)="submitChangePassword()">
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Current Password</label>
+            <div class="relative">
+              <input
+                formControlName="currentPassword"
+                [type]="showCurrentPassword() ? 'text' : 'password'"
+                class="w-full rounded-md border border-input bg-background px-3 py-2 pr-10"
+                placeholder="Enter current password"
+              />
+              <button
+                type="button"
+                class="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                (click)="toggleCurrentPasswordVisibility()"
+              >
+                <lucide-icon [name]="showCurrentPassword() ? 'eye-off' : 'eye'" class="h-4 w-4"></lucide-icon>
+              </button>
+            </div>
+            @if (passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched) {
+              <p class="text-sm text-destructive">Current password is required</p>
+            }
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">New Password</label>
+            <div class="relative">
+              <input
+                formControlName="newPassword"
+                [type]="showNewPassword() ? 'text' : 'password'"
+                class="w-full rounded-md border border-input bg-background px-3 py-2 pr-10"
+                placeholder="Enter new password (min 6 characters)"
+              />
+              <button
+                type="button"
+                class="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                (click)="toggleNewPasswordVisibility()"
+              >
+                <lucide-icon [name]="showNewPassword() ? 'eye-off' : 'eye'" class="h-4 w-4"></lucide-icon>
+              </button>
+            </div>
+            @if (passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched) {
+              <p class="text-sm text-destructive">Password must be at least 6 characters</p>
+            }
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Confirm New Password</label>
+            <div class="relative">
+              <input
+                formControlName="confirmPassword"
+                [type]="showConfirmPassword() ? 'text' : 'password'"
+                class="w-full rounded-md border border-input bg-background px-3 py-2 pr-10"
+                placeholder="Confirm new password"
+              />
+              <button
+                type="button"
+                class="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                (click)="toggleConfirmPasswordVisibility()"
+              >
+                <lucide-icon [name]="showConfirmPassword() ? 'eye-off' : 'eye'" class="h-4 w-4"></lucide-icon>
+              </button>
+            </div>
+            @if (passwordForm.get('confirmPassword')?.invalid && passwordForm.get('confirmPassword')?.touched) {
+              <p class="text-sm text-destructive">Please confirm your new password</p>
+            }
+          </div>
+          <div class="flex justify-end gap-3 pt-2">
+            <button type="button" class="rounded-md border border-border px-4 py-2 text-sm" (click)="closeChangePassword()">Cancel</button>
+            <button
+              type="submit"
+              class="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"
+              [disabled]="isChangingPassword()"
+            >
+              {{ isChangingPassword() ? 'Changing...' : 'Change Password' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
 </div>

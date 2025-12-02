@@ -25,7 +25,7 @@ import {
   User,
   Users,
   X,
-} from 'lucide-angular';
+} from "lucide-angular";
 
 export const lucideIcons = {
   AlertCircle,
